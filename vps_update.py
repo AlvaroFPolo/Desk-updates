@@ -198,6 +198,12 @@ def svc(action: str, unit="desk.service"):
         run(["systemctl", action, unit], timeout=120)
     elif unit == "desk.service":
         run(["bash", "-c", CFG["svc"].format(action=action)], timeout=120)
+    if action == "stop" and unit == "desk.service":  # never swap code under a desk that is still serving
+        for _ in range(30):
+            if http("/api/state")[0] == 0:
+                return
+            time.sleep(1)
+        raise RuntimeError("el desk no se ha parado (sigue respondiendo)")
 
 
 def desk_env():
@@ -394,8 +400,8 @@ def install(m: dict, keys, st: dict, token: str) -> bool:
     if CFG["svc"] == "systemd":
         run(["systemctl", "stop", "desk-watch.timer"], check=False, timeout=60)
     try:
-        svc("stop")
         try:
+            svc("stop")
             _mkbackups()
             before = db_probe("backup", os.path.join(P("data", "backups"), f"desk-before-v{N}-{int(time.time())}.db"))
             if before["integrity"] != "ok":
