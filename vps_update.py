@@ -184,11 +184,11 @@ def fetch_repo(path: str, limit: int, api_first: bool) -> bytes:
 
 def run(cmd, as_desk=False, env=None, timeout=900, check=True, cwd=None):
     if as_desk and CFG["runas"]:
-        cmd = ["runuser", "-u", CFG["runas"], "--"] + cmd
+        cmd = ["/usr/sbin/runuser", "-u", CFG["runas"], "--"] + cmd
     r = subprocess.run(cmd, cwd=cwd or CFG["desk"], env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout)
     if check and r.returncode != 0:
         tail = (r.stderr or r.stdout or "").strip().splitlines()[-3:]
-        name = next((os.path.basename(c) for c in cmd if not c.startswith("-") and c not in ("runuser", "--", CFG["runas"])), "?")
+        name = next((os.path.basename(c) for c in cmd if not c.startswith("-") and c not in ("/usr/sbin/runuser", "runuser", "--", CFG["runas"])), "?")
         raise RuntimeError(f"{name} rc={r.returncode}: {' | '.join(tail)[:300]}")
     return r
 
@@ -207,7 +207,7 @@ def svc(action: str, unit="desk.service"):
 
 
 def desk_env():
-    return {"PATH": "/usr/local/bin:/usr/bin:/bin", "LANG": "C.UTF-8", "HOME": CFG["desk"], "TZ": os.environ.get("TZ", "Europe/Madrid")}
+    return {"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C.UTF-8", "HOME": CFG["desk"], "TZ": os.environ.get("TZ", "Europe/Madrid")}
 
 
 def py():
@@ -233,7 +233,7 @@ print(json.dumps(out))
 def db_probe(*args, stdin=None):
     cmd = [py(), "-c", DB_PROBE, *args]
     if CFG["runas"]:
-        cmd = ["runuser", "-u", CFG["runas"], "--"] + cmd
+        cmd = ["/usr/sbin/runuser", "-u", CFG["runas"], "--"] + cmd
     r = subprocess.run(cmd, cwd=CFG["desk"], env=desk_env(), input=stdin, capture_output=True, text=True, timeout=300)
     if r.returncode != 0:
         raise RuntimeError("comprobación de la base de datos falló: " + (r.stderr.strip().splitlines() or ["?"])[-1][:200])
@@ -373,7 +373,7 @@ def notify(text: str):
         return
     cmd = [py(), "scripts/tg_notify.py", text, "update"]
     if CFG["runas"]:
-        cmd = ["runuser", "-m", "-u", CFG["runas"], "--"] + cmd
+        cmd = ["/usr/sbin/runuser", "-m", "-u", CFG["runas"], "--"] + cmd
     r = subprocess.run(cmd, cwd=CFG["desk"], stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
     log(f"aviso Telegram: {(r.stdout or '').strip()[:60] or 'rc=' + str(r.returncode)}")
 
