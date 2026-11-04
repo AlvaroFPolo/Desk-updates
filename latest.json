@@ -1,8 +1,8 @@
 {
- "created": "2026-11-04T02:12:32+01:00",
- "file": "releases/v7.bin",
- "sha256": "4f44aed79169923a5b36602351409717e5a734c878a372a7eaaaa6ec1fa2ad53",
- "size": 153717,
- "version": 7,
- "hmac": "26483eb38e53abd29144e1118b66b69b4ab4fa8e8134c79d2bd9ae0065ce5cc5"
+ "created": "2026-11-04T02:41:35+01:00",
+ "file": "releases/v8.bin",
+ "sha256": "58d8776b93d34643b55ffd0d454cb6df445085343ced9d4ac8f29c2e8b965a99",
+ "size": 154268,
+ "version": 8,
+ "hmac": "6acf796e01d902c1a09e0268833eb8c3e7405f8d838033d0ca69b188b84fae2e"
 }
